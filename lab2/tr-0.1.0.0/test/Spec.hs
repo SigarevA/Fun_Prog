@@ -33,6 +33,10 @@ main = hspec $ describe "Testing tr" $ do
       it "abc -> d" $
         tr' "abc" "d" "abcd" `shouldBe` "dddd"
 
+    describe "input number" $
+      it "13 -> 24" $
+        tr' "13" "24" "13613" `shouldBe` "24624"
+
     describe "Upper case" $
       it "abc -> d" $
         tr' "HW" "hw" "Hello World!" `shouldBe` "hello world!"
@@ -40,6 +44,18 @@ main = hspec $ describe "Testing tr" $ do
     describe "Delete" $
       it "-d HW" $
         tr' "-d" "HW" "Hello World!" `shouldBe` "ello orld!"
+
+    describe "Delete v2" $
+      it "-d l" $
+       tr' "-d" "l" "Hello world!" `shouldBe` "Heo word!"
+
+    describe "Reverse delete" $
+      it "d- l" $
+       tr' "d-" "l" "ads-sda" `shouldBe` "alslsla"
+
+    describe "Delete all" $
+      it "-d abc" $
+       tr' "-d" "abc" "abcabcabc" `shouldBe` ""    
 
     describe "tr quick-check" $
       it "empty input is identity" $ property prop_empty_id
