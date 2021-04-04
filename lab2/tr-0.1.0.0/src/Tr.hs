@@ -33,25 +33,20 @@ type CharSet = String
 -- the second argument being `Just ""`, we will not be testing this edge case.
 tr :: CharSet -> Maybe CharSet -> String -> String
 tr _inset _outset xs =  case _outset of 
-        Nothing -> filterXs xs _inset
-        Just x -> transformXs xs $ getPairs _inset x
-
-filterXs xs _inset = filter (isNotContains _inset) xs
+        Nothing -> filter (isNotContains _inset) xs
+        Just x -> map ( transformXs $ getPairs _inset x) xs
 
 isNotContains [] x = True
 isNotContains ( p : patterns) x 
     | p == x = False
     | otherwise = isNotContains patterns x
 
-transformXs xs pair = map (transform pair) xs 
-    where 
-        transform b x = transformHelper x b
-            where 
-                transformHelper template [] = template 
-                transformHelper template ( pair : pairs) 
-                    | fst pair == template = snd pair
-                    | otherwise = transformHelper template pairs
+transformXs [] template = template 
+transformXs ( pair : pairs) template
+    | fst pair == template = snd pair
+    | otherwise = transformXs pairs template
 
+getPairs [] _ = error "Empty input map"
 getPairs input output = reverse $ getPairsHelper input output []
     where 
         getOutputTail out =  if length out == 1
@@ -59,5 +54,3 @@ getPairs input output = reverse $ getPairsHelper input output []
             else tail out
         getPairsHelper [] _ holder = holder
         getPairsHelper (x : xs) ys holder = getPairsHelper xs (getOutputTail ys) ( (x, head ys ) : holder)
-        
-getPairs [] _ = error "Empty input map"
