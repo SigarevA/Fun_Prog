@@ -23,12 +23,21 @@ instance Random DieValue where
 type Army = Int
 
 main :: IO ()
+getLen :: [a] -> Double
+getLen values = helper values 0
+    where 
+        helper [] acc = acc 
+        helper (x : xs) acc = helper xs (acc + 1) 
+
 -- main = putStrLn $ show $ calLosses [True, True, False, True, True]
 --main =  putStrLn $ show $ attack [1 .. 5] [5, 4 .. 1]
-
-main = do 
-    val <- evalRandIO ( battle $ Battlefield 10 10)
-    putStrLn $ show val
+main = putStrLn $ show $ evalRand ( successProb $ Battlefield 10 10) (mkStdGen 98)
+--main = do 
+--    val <- evalRandIO ( successProb $ Battlefield 10 10)
+    -- putStrLn $ show val
+-- main = do 
+--    val <- evalRandIO ( battle $ Battlefield 10 10)
+--    putStrLn $ show val
 -- main = putStrLn $ show $ ( DV 5) > (DV 5)
 -- main = do 
 --    val <- evalRandIO ( generateDie 13)
@@ -69,9 +78,20 @@ battle battlefield = do
         attackerCount = attackers battlefield
         defenderCount = defenders battlefield
 
+invade :: Battlefield -> Rand StdGen Battlefield
+invade battlefield 
+    | attackers battlefield == 1 || defenders battlefield == 0 = return battlefield
+    | otherwise = do 
+        newBf <- battle battlefield
+        invade newBf 
+
+successProb :: Battlefield -> Rand StdGen Double
+successProb battlefield = (/ 1000) . getLen . filter id . map (\bf -> attackers bf == 1) <$> replicateM 1000 ( invade battlefield)
+-- invade battlefield = (/ 1000) ( length . filter id . map (\bf -> attackers bf == 1) ) <$> replicateM 1000 battlefield 
+
 -- test =  do
 --    stdGen <- getStdGen
 --    let r = evalRand testv stdGen :: Int
 --    putStrLn $ "Result: " ++ show r 
 testv :: Rand StdGen DieValue
-testv = getRandom
+testv = getRandom   
