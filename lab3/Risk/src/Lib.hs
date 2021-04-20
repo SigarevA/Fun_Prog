@@ -1,6 +1,5 @@
 module Lib
-    ( someFunc
-    , battle 
+    ( battle 
     , invade
     , successProb
     , Battlefield (..)
@@ -17,7 +16,7 @@ newtype DieValue = DV {
 data Battlefield = Battlefield {
     attackers :: Army,
     defenders :: Army
-} deriving(Show)
+} deriving(Show, Eq, Ord)
  
 convert (a, c) = ( DV a, c) 
 
@@ -31,8 +30,6 @@ getLen values = helper values 0
     where 
         helper [] acc = acc 
         helper (x : xs) acc = helper xs (acc + 1) 
-
--- generateDie n = replicate n ((\ x -> evalRandIO testv) 0)
 
 generateDie:: Int -> Rand StdGen [DieValue]
 generateDie n =  reverse . sort <$> replicateM n testv
@@ -70,15 +67,7 @@ invade battlefield
         invade newBf 
 
 successProb :: Battlefield -> Rand StdGen Double
-successProb battlefield = (/ 1000) . getLen . filter id . map (\bf -> attackers bf == 1) <$> replicateM 1000 ( invade battlefield)
--- invade battlefield = (/ 1000) ( length . filter id . map (\bf -> attackers bf == 1) ) <$> replicateM 1000 battlefield 
+successProb battlefield = (/ 1000) . getLen . filter id . map (\bf -> defenders bf == 0) <$> replicateM 1000 ( invade battlefield)
 
--- test =  do
---    stdGen <- getStdGen
---    let r = evalRand testv stdGen :: Int
---    putStrLn $ "Result: " ++ show r 
 testv :: Rand StdGen DieValue
-testv = getRandom   
-
-someFunc :: IO ()
-someFunc = putStrLn "sad"
+testv = getRandom
